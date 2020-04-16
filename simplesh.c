@@ -1,3 +1,4 @@
+#include<unistd.h>
 #include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
@@ -55,16 +56,75 @@ char** dark_split_line(char* line)
 }
 int dark_execute(char** args)
 {
+    char* builtin_commands[] = {"dark_ls","dark_cd","dark_pwd","help","exit"};
+    int flag=0;
+    int comm_len = sizeof(builtin_commands)/sizeof(char *);
+    for(int i=0;i<comm_len;i++)
+    {
+        if(strcmp(args[0],builtin_commands[i])==0)
+        {
+            flag=1;
+            break;
+        }
+    }
+    if(flag==0)
+    {
+        printf("Command not found!\n");
+        printf("Please type help for the list of available commands!\n");
+        return 1;
+    }
     if(strcmp(args[0],"help")==0)
     {
         printf( "Help mode of DARK_SHELL \n"
             "dark_ls: list all the files in the current directory\n"
             "dark_cd: Change the current directory\n"
+            "dark_pwd: Show the current working directory\n"
+            "help: Show the list of available commands\n"
+            "exit: Exit the DARK_SHELL"
         );
+        return 1;
     }
     if(strcmp(args[0],"exit")==0){
      printf("Thanks for using DarkSHell! Hope to see you again soon!\n");
      exit(EXIT_SUCCESS);
+    }
+    if(strcmp(args[0],"dark_cd")==0)
+    {
+        if(args[1]==NULL)
+        {
+            fprintf(stderr, "dark_sh: Expected argument to dark_cd \n");
+        }
+        else
+        {
+           if(chdir(args[1]) !=0) perror("No such file or directory!\n"); 
+        }
+        return 1;
+    }
+    if(strcmp(args[0],"dark_pwd")==0)
+    {
+        if(args[1]!=NULL)
+        {
+            fprintf(stderr,"No argument is required for the command dark_pwd!\n");
+        }
+        else
+        {
+            char* buf=malloc(DARKSH_BUF*sizeof(char));
+            if(getcwd(buf,DARKSH_BUF)=="NULL")
+            {
+                if(strcmp(strerror(errno),"ERANGE")==0)
+                {
+                    buf=realloc(buf,DARKSH_BUF*sizeof(char));
+                    if(!buf) 
+                    {
+                        fprintf(stderr, "Reallocation failed!\n");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+            }
+            else 
+                printf("%s\n",getcwd(buf,DARKSH_BUF));
+        }
+        return 1;
     }
 }
 void dark_loop(void)
@@ -72,11 +132,18 @@ void dark_loop(void)
     char *line;
     char **args; //array containing the args
     int status;
+    printf(" \t \t \t Welcome to DARK SHELL \n"
+         "\t \t  This is built by ABHIRUP GUPTA CS1907 \n\n");
     do
     {
-        printf(" \t \t \t Welcome to DARK SHELL \n"
-         "\t \t  This is built by ABHIRUP GUPTA CS1907 \n");
         printf("> ");
+        char* buf = malloc(DARKSH_BUF*sizeof(char));
+        if(getcwd(buf,DARKSH_BUF)=="NULL")
+        {
+            perror("Cannot read the current path!");
+            exit(EXIT_FAILURE);
+        }
+        printf("%s ",getcwd(buf,DARKSH_BUF));
         line = dark_readline();
         args = dark_split_line(line); // take the arguments from the line
         status = dark_execute(args); //here we will execute the command
