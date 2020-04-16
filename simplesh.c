@@ -56,7 +56,7 @@ char** dark_split_line(char* line)
 }
 int dark_execute(char** args)
 {
-    char* builtin_commands[] = {"dark_ls","dark_cd","dark_pwd","dark_env","help","exit"};
+    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_cl","help","exit"};
     int flag=0;
     int comm_len = sizeof(builtin_commands)/sizeof(char *);
     for(int i=0;i<comm_len;i++)
@@ -76,12 +76,12 @@ int dark_execute(char** args)
     if(strcmp(args[0],"help")==0)
     {
         printf( "Help mode of DARK_SHELL \n"
-            "dark_ls: list all the files in the current directory\n"
             "dark_cd: Change the current directory\n"
             "dark_pwd: Show the current working directory\n"
             "dark_env: List all the environment variables\n"
+            "dark_cl: Clear the screen\n"
             "help: Show the list of available commands\n"
-            "exit: Exit the DARK_SHELL"
+            "exit: Exit the DARK_SHELL\n"
         );
         return 1;
     }
@@ -144,6 +144,12 @@ int dark_execute(char** args)
                 s=*(environ+i); //printing all the elements in the array
             }
         }
+        return 1;
+    }
+    if(strcmp(args[0],"dark_cl")==0)
+    {
+        const char* clear_screen = "\e[1;1H\e[2J";
+        write(STDOUT_FILENO, clear_screen, 12);
         return 1;
     }
 }
