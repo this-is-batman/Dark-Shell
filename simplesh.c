@@ -56,7 +56,7 @@ char** dark_split_line(char* line)
 }
 int dark_execute(char** args)
 {
-    char* builtin_commands[] = {"dark_ls","dark_cd","dark_pwd","help","exit"};
+    char* builtin_commands[] = {"dark_ls","dark_cd","dark_pwd","dark_env","help","exit"};
     int flag=0;
     int comm_len = sizeof(builtin_commands)/sizeof(char *);
     for(int i=0;i<comm_len;i++)
@@ -79,6 +79,7 @@ int dark_execute(char** args)
             "dark_ls: list all the files in the current directory\n"
             "dark_cd: Change the current directory\n"
             "dark_pwd: Show the current working directory\n"
+            "dark_env: List all the environment variables\n"
             "help: Show the list of available commands\n"
             "exit: Exit the DARK_SHELL"
         );
@@ -123,6 +124,25 @@ int dark_execute(char** args)
             }
             else 
                 printf("%s\n",getcwd(buf,DARKSH_BUF));
+        }
+        return 1;
+    }
+    if(strcmp(args[0],"dark_env")==0)
+    {
+        if(args[1]!=NULL)
+        {
+            fprintf(stderr, "No argument required for this!\n");
+        }
+        else
+        {
+            extern char** environ; //array of pointers to environment 
+            int i=1;
+            char *s= *environ;
+            for(;s;i++)
+            {
+                printf("%s\n", s);
+                s=*(environ+i); //printing all the elements in the array
+            }
         }
         return 1;
     }
