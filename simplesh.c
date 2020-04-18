@@ -1,3 +1,4 @@
+#include<sys/stat.h>
 #include<unistd.h>
 #include<string.h>
 #include<stdio.h>
@@ -56,7 +57,7 @@ char** dark_split_line(char* line)
 }
 int dark_execute(char** args)
 {
-    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_cl","help","exit"};
+    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_cl","dark_dir","help","exit"};
     int flag=0;
     int comm_len = sizeof(builtin_commands)/sizeof(char *);
     for(int i=0;i<comm_len;i++)
@@ -151,6 +152,23 @@ int dark_execute(char** args)
         const char* clear_screen = "\e[1;1H\e[2J";
         write(STDOUT_FILENO, clear_screen, 12);
         return 1;
+    }
+    if(strcmp(args[0],"dark_dir")==0) //create a new directory
+    {
+        if(args[1]==NULL)
+        {
+            fprintf(stderr, "Please enter the path of the directory\n");
+            exit(EXIT_FAILURE);
+        }
+        else
+        {
+            int status = mkdir(args[1], S_IRWXU);
+            if(status==-1)
+            {
+                perror("Directory creation failed!\n");
+            }
+        }
+    return 1;
     }
 }
 void dark_loop(void)
