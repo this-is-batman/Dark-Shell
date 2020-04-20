@@ -1,9 +1,11 @@
+#include<dirent.h>
 #include<sys/stat.h>
 #include<unistd.h>
 #include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<errno.h>
+#include<sys/stat.h>
 #define DARKSH_BUF 256
 #define DARK_DELIM " \t\r\n\a"
 char* dark_readline()
@@ -57,7 +59,7 @@ char** dark_split_line(char* line)
 }
 int dark_execute(char** args)
 {
-    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_cl","dark_dir","help","exit"};
+    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_ls","dark_cl","dark_dir","dark_rm","help","exit"};
     int flag=0;
     int comm_len = sizeof(builtin_commands)/sizeof(char *);
     for(int i=0;i<comm_len;i++)
@@ -81,6 +83,10 @@ int dark_execute(char** args)
             "dark_pwd: Show the current working directory\n"
             "dark_env: List all the environment variables\n"
             "dark_cl: Clear the screen\n"
+            "dark_dir: Create a directory\n"
+            "dark_rm: Remove a directoery\n"
+            "dark_ls: List all the files in the current directory\n"
+            "dark_ls -l: List all files along with their information\n"
             "help: Show the list of available commands\n"
             "exit: Exit the DARK_SHELL\n"
         );
@@ -98,7 +104,7 @@ int dark_execute(char** args)
         }
         else
         {
-           if(chdir(args[1]) !=0) perror("No such file or directory!\n"); 
+           if(chdir(args[1]) !=0) perror("No such file or directory!"); 
         }
         return 1;
     }
@@ -158,17 +164,88 @@ int dark_execute(char** args)
         if(args[1]==NULL)
         {
             fprintf(stderr, "Please enter the path of the directory\n");
-            exit(EXIT_FAILURE);
         }
         else
         {
             int status = mkdir(args[1], S_IRWXU);
             if(status==-1)
             {
-                perror("Directory creation failed!\n");
+                perror("Directory creation failed!");
+                return 1;
             }
         }
     return 1;
+    }
+    if(strcmp(args[0],"dark_ls")==0) //remove a directory
+    {
+        DIR *dir;
+        struct dirent *ent;
+        if(args[1]!=NULL)
+        {
+            if((dir= opendir(args[1]))!=NULL)
+            {
+                while((ent = readdir(dir)) != NULL)
+                {
+                    printf("%s\n",ent->d_name);
+                }
+                closedir(dir);
+            }
+            else if(strcmp(args[1],"-l")==0)
+            {
+                struct stat mystat;
+                if(args[2]==NULL)
+                {
+                    if((dir=opendir("."))!=NULL)
+                    {
+                        while((ent = readdir(dir))!=NULL)
+                     {
+                          stat(ent->d_name, &mystat);
+                           printf("%d %ld %ld %ld %ld\t",mystat.st_uid,mystat.st_size,mystat.st_atime,mystat.st_mtime,mystat.st_ctime);
+                            printf("%s\n",ent->d_name);
+                     }
+                    }
+                    else perror("Problem with dark_ls");
+                }
+                else
+                {
+                    if((dir=opendir(args[2]))!=NULL)
+                    {
+                        while((ent = readdir(dir))!=NULL)
+                     {
+                          stat(ent->d_name, &mystat);
+                           printf("%d %ld %ld %ld %ld\t",mystat.st_uid,mystat.st_size,mystat.st_atime,mystat.st_mtime,mystat.st_ctime);
+                            printf("%s\n",ent->d_name);
+                     }
+                    }
+                    else
+                    {
+                        perror("Problem with dark_ls");
+                    }
+                }
+            }
+            else
+            {
+                perror("Problem with dark_ls");
+                return 1;
+            }
+        }
+        else if(args[1]==NULL)
+        {
+            if((dir = opendir("."))!=NULL)
+            {
+                while((ent = readdir(dir)) != NULL)
+                {
+                   printf("%s\n", ent->d_name);
+                }
+             closedir(dir);
+            }
+         else
+         {
+             perror("Problem with dark_ls");
+             return 1;
+         }
+        }
+         return 1;
     }
 }
 void dark_loop(void)
@@ -185,7 +262,6 @@ void dark_loop(void)
         if(getcwd(buf,DARKSH_BUF)=="NULL")
         {
             perror("Cannot read the current path!");
-            exit(EXIT_FAILURE);
         }
         printf("%s ",getcwd(buf,DARKSH_BUF));
         line = dark_readline();
