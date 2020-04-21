@@ -304,9 +304,7 @@ void dark_loop(void)
         printf("%s ",getcwd(buf,DARKSH_BUF));
         line = dark_readline();
         args = dark_split_line(line); // take the arguments from the line
-        //fprintf(fp, "%d\t\t\t%s\n",++count,line);
         fprintf(fp,"%d\t\t\t",++count);
-        //fputs(line,fp);
         for(int i=0;args[i]!=NULL;i++)
             fprintf(fp,"%s ",args[i]);
         fprintf(fp,"\n");
