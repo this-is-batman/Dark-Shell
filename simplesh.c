@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 500
+#define _GNU_SOURCE
 #include<dirent.h>
 #include<sys/stat.h>
 #include<unistd.h>
@@ -6,8 +8,21 @@
 #include<stdlib.h>
 #include<errno.h>
 #include<sys/stat.h>
+#include<ftw.h>
 #define DARKSH_BUF 256
 #define DARK_DELIM " \t\r\n\a"
+// used for unlinking that is recursively deleting the files
+int unlink_fl(const char* fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+{
+    int rv= remove(fpath);
+    if(rv) perror(fpath);
+    return rv;
+}
+
+int drm(char* path)
+{
+    return nftw(path, unlink_fl, 64, FTW_DEPTH| FTW_PHYS);
+}
 char* dark_readline()
 {
     char *line = NULL; //line is stored in this line buffer or string
@@ -246,6 +261,24 @@ int dark_execute(char** args)
          }
         }
          return 1;
+    }
+    if(strcmp(args[0],"dark_rm")==0)
+    {
+        if(args[1]==NULL) 
+            fprintf(stderr,"Please provide another argument, see help for more information!\n");
+        else
+        {
+            int status = drm(args[1]);
+            if(status==-1)
+            {
+                perror("dark_rm failed");
+            }
+            else
+            {
+                printf("Succesfully removed directory!\n");
+            }
+        }
+        return 1;
     }
 }
 void dark_loop(void)
