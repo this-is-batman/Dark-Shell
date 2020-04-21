@@ -74,7 +74,7 @@ char** dark_split_line(char* line)
 }
 int dark_execute(char** args)
 {
-    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_ls","dark_cl","dark_dir","dark_rm","help","exit"};
+    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_ls","dark_cl","dark_dir","dark_rm","help","history","exit"};
     int flag=0;
     int comm_len = sizeof(builtin_commands)/sizeof(char *);
     for(int i=0;i<comm_len;i++)
@@ -103,6 +103,7 @@ int dark_execute(char** args)
             "dark_ls: List all the files in the current directory\n"
             "dark_ls -l: List all files along with their information\n"
             "help: Show the list of available commands\n"
+            "history <offset>: Show the last <offset> commands\n"
             "exit: Exit the DARK_SHELL\n"
         );
         return 1;
@@ -288,6 +289,10 @@ void dark_loop(void)
     int status;
     printf(" \t \t \t Welcome to DARK SHELL \n"
          "\t \t  This is built by ABHIRUP GUPTA CS1907 \n\n");
+    int count=0;
+    FILE *fp;
+    fclose(fopen("history.txt","w"));
+    fp= fopen("history.txt","r+");
     do
     {
         printf("> ");
@@ -299,6 +304,44 @@ void dark_loop(void)
         printf("%s ",getcwd(buf,DARKSH_BUF));
         line = dark_readline();
         args = dark_split_line(line); // take the arguments from the line
+        //fprintf(fp, "%d\t\t\t%s\n",++count,line);
+        fprintf(fp,"%d\t\t\t",++count);
+        //fputs(line,fp);
+        for(int i=0;args[i]!=NULL;i++)
+            fprintf(fp,"%s ",args[i]);
+        fprintf(fp,"\n");
+        if(strcmp(args[0],"history")==0)
+        {
+            if(args[1]==NULL) fprintf(stderr, "Please enter the offset.\n");
+            else
+            {
+                if(fp==NULL) fprintf(stderr,"History file not working!");
+                else
+                {
+                    char c;
+                    int k=0,n,i,m;
+                    k=atoi(args[1]); //the offset
+                    n=count-k;
+                    if(n<0 || n==count) printf("So many commands have not been called or offset is given as 0!\n");
+                    else
+                    {
+                       fseek(fp,0,SEEK_SET);
+                        for(i=0;i<n;i++)
+                         {
+                            fscanf(fp,"%d",&m);
+                            c=fgetc(fp);
+                              while(c!='\n')
+                               c=fgetc(fp);
+        
+                           }
+                        c=fgetc(fp);
+                        printf("sequnce of call   \t   commands\n");
+                        while(c!=EOF)
+                           {printf("%c",c); c=fgetc(fp);}
+                    }
+                }
+            }
+        }
         status = dark_execute(args); //here we will execute the command
         free(line);
         free(args);
