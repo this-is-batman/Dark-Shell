@@ -74,7 +74,7 @@ char** dark_split_line(char* line)
 }
 int dark_execute(char** args)
 {
-    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_ls","dark_cl","dark_dir","dark_rm","help","history","exit"};
+    char* builtin_commands[] = {"dark_cd","dark_pwd","dark_env","dark_ls","dark_cl","dark_dir","dark_rm","dark_rmdir","help","history","exit"};
     int flag=0;
     int comm_len = sizeof(builtin_commands)/sizeof(char *);
     for(int i=0;i<comm_len;i++)
@@ -99,7 +99,8 @@ int dark_execute(char** args)
             "dark_env: List all the environment variables\n"
             "dark_cl: Clear the screen\n"
             "dark_dir: Create a directory\n"
-            "dark_rm: Remove a directoery\n"
+            "dark_rm: Remove a directory both empty and full\n"
+            "dark_rmdir: Remove an empty directory\n"
             "dark_ls: List all the files in the current directory\n"
             "dark_ls -l: List all files along with their information\n"
             "help: Show the list of available commands\n"
@@ -281,6 +282,19 @@ int dark_execute(char** args)
         }
         return 1;
     }
+    if(strcmp(args[0],"dark_rmdir")==0)
+    {
+        if(args[1]==NULL)
+            fprintf(stderr,"Please provide another argument, see help for more information!\n");
+        else
+        {
+            int status = rmdir(args[1]);
+            if(status==-1)
+                perror("DarK_rmdir failed: ");
+            else printf("Succesfully removed directory!\n");
+        }
+        return 1;
+    }
 }
 void dark_loop(void)
 {
@@ -289,6 +303,20 @@ void dark_loop(void)
     int status;
     printf(" \t \t \t Welcome to DARK SHELL \n"
          "\t \t  This is built by ABHIRUP GUPTA CS1907 \n\n");
+    printf("Here are a list of commands to get you started: \n");
+    printf( "dark_cd: Change the current directory\n"
+            "dark_pwd: Show the current working directory\n"
+            "dark_env: List all the environment variables\n"
+            "dark_cl: Clear the screen\n"
+            "dark_dir: Create a directory\n"
+            "dark_rm: Remove a directory both empty and full\n"
+            "dark_rmdir: Remove an empty directory\n"
+            "dark_ls: List all the files in the current directory\n"
+            "dark_ls -l: List all files along with their information\n"
+            "help: Show the list of available commands\n"
+            "history <offset>: Show the last <offset> commands\n"
+            "exit: Exit the DARK_SHELL\n\n"
+        );
     int count=0;
     FILE *fp;
     fclose(fopen("history.txt","w"));
