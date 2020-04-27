@@ -338,7 +338,7 @@ void dark_loop(void)
         fprintf(fp,"\n");
         if(strcmp(args[0],"history")==0)
         {
-            if(args[1]==NULL) fprintf(stderr, "Please enter the offset.\n");
+            if(args[1]==NULL) printf("Please enter the offset!\n");
             else
             {
                 if(fp==NULL) fprintf(stderr,"History file not working!");
@@ -361,7 +361,7 @@ void dark_loop(void)
         
                            }
                         c=fgetc(fp);
-                        printf("sequnce of call   \t   commands\n");
+                        printf("Sequence of call   \t   commands\n");
                         while(c!=EOF)
                            {printf("%c",c); c=fgetc(fp);}
                     }
