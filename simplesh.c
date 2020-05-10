@@ -1,3 +1,8 @@
+/**
+    Name - Abhirup Gupta
+    Roll - CS1907
+    Program to build a shell
+*/
 #define _XOPEN_SOURCE 500
 #define _GNU_SOURCE
 #include<dirent.h>
@@ -217,32 +222,47 @@ int dark_execute(char** args)
                         while((ent = readdir(dir))!=NULL)
                      {
                           stat(ent->d_name, &mystat);
-                           printf("%d %ld %ld %ld %ld\t",mystat.st_uid,mystat.st_size,mystat.st_atime,mystat.st_mtime,mystat.st_ctime);
-                            printf("%s\n",ent->d_name);
-                     }
-                    }
-                    else perror("Problem with dark_ls");
-                }
-                else
-                {
-                    if((dir=opendir(args[2]))!=NULL)
-                    {
-                        while((ent = readdir(dir))!=NULL)
-                     {
-                          stat(ent->d_name, &mystat);
-                           printf("%d %ld %ld %ld %ld\t",mystat.st_uid,mystat.st_size,mystat.st_atime,mystat.st_mtime,mystat.st_ctime);
+                          printf("UID \t Size \t Access_time \t Modified time \t Creation_time\n");
+                           printf("%d \t %ld \t %ld \t %ld \t %ld\t",mystat.st_uid,mystat.st_size,mystat.st_atime,mystat.st_mtime,mystat.st_ctime);
                             printf("%s\n",ent->d_name);
                      }
                     }
                     else
                     {
                         perror("Problem with dark_ls");
+                    } 
+                }
+                else
+                {
+                    if(chdir(args[2])!=0)
+                    {
+                        perror("dark_ls -l: ");
+                        printf("Please enter the entire path\n");
+                    } 
+                    else
+                    {
+                    if((dir=opendir("."))!=NULL) 
+                    {
+                        while((ent = readdir(dir))!=NULL)
+                     {
+                          stat(ent->d_name, &mystat);
+                          printf("UID \t Size \t Access_time \t Modified time \t Creation_time\n");
+                           printf("%d \t %ld \t %ld \t %ld \t %ld\t",mystat.st_uid,mystat.st_size,mystat.st_atime,mystat.st_mtime,mystat.st_ctime);
+                            printf("%s\n",ent->d_name);
+                     }
                     }
+                    else
+                    {
+                        perror("Problem with dark_ls");
+                        printf("Please enter the entire path\n");
+                    }
+                }
                 }
             }
             else
             {
                 perror("Problem with dark_ls");
+                printf("Please enter the entire path\n");
                 return 1;
             }
         }
